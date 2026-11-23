@@ -204,7 +204,7 @@
           if(gs.baseHp[1]<=0||gs.baseHp[2]<=0){gs.ended=true;gs.winner=gs.baseHp[1]<=0?2:1;room.status="finished";}
           return room;
         },undefined,false);
-      }catch(e){$("gameMessage").textContent="انقطع الاتصال مؤقتًا…";}
+      }catch(e){const detail=(e&&((e.code||"")+" "+(e.message||""))).trim();$("gameMessage").textContent="تعذر تحديث المباراة: "+(detail||"خطأ غير معروف");}
     },1000);
   }
   if(window.firebase){
