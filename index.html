@@ -43,15 +43,24 @@
     </section>
     <section id="gamePanel" class="panel game-panel hidden">
       <div class="game-head"><div><span class="tag">⚔ ساحة المعركة</span><h2 id="matchTitle">اللاعب 1 ضد اللاعب 2</h2></div><div class="game-head-actions"><div class="room-chip">غرفة <b id="gameCode"></b></div><button id="fullscreenBtn" class="screen-btn" type="button">⛶ ملء الشاشة</button></div></div>
-      <div class="controls">
-        <button data-unit="worker" class="unit-btn">⛏️ عامل <small>50 ذهب</small></button>
-        <button data-unit="sword" class="unit-btn">⚔️ سياف <small>100 ذهب</small></button>
-        <button data-unit="archer" class="unit-btn">🏹 رامٍ <small>150 ذهب</small></button>
-        <button data-unit="wizard" class="unit-btn">🧙 ساحر <small>250 ذهب</small></button>
-        <button data-unit="giant" class="unit-btn">🗿 عملاق <small>400 ذهب</small></button>
+      <div class="battlefield-wrap">
+        <div class="battle-hud">
+          <div class="controls">
+            <button data-unit="worker" class="unit-btn" title="عامل - 50 ذهب"><b>⛏️</b><small>50</small></button>
+            <button data-unit="sword" class="unit-btn" title="سياف - 100 ذهب"><b>⚔️</b><small>100</small></button>
+            <button data-unit="archer" class="unit-btn" title="رامٍ - 150 ذهب"><b>🏹</b><small>150</small></button>
+            <button data-unit="wizard" class="unit-btn" title="ساحر - 250 ذهب"><b>🧙</b><small>250</small></button>
+            <button data-unit="giant" class="unit-btn" title="عملاق - 400 ذهب"><b>🗿</b><small>400</small></button>
+          </div>
+          <div class="battle-status">
+            <span id="gold">🪙 150</span>
+            <span id="army">👥 0/100</span>
+            <button id="hudFullscreen" type="button" aria-label="ملء الشاشة">⛶</button>
+          </div>
+        </div>
+        <div id="game" aria-label="ساحة القتال"></div>
+        <div class="battle-message"><span id="gameMessage" aria-live="polite">اجمع الذهب ودرّب جيشك!</span></div>
       </div>
-      <div id="game" aria-label="ساحة القتال"></div>
-      <div class="game-foot"><span id="gold">🪙 150</span><span id="army">الجيش: 0</span><span id="gameMessage" aria-live="polite">اجمع الذهب ودرّب جيشك!</span></div>
     </section>
     <footer>STICK WARS: DUEL <span>مصممة للقتال بين صديقين</span></footer>
   </main>
