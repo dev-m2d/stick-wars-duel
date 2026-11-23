@@ -12,8 +12,11 @@
     appId:"1:1087007888495:web:344ea8e25bc49e01c5e99a"
   };
   let db, user=null, roomRef=null, roomCode="", player=0, game=null, scene=null, roomListener=null, hostTimer=null, latest=null;
-  const costs={worker:50,sword:100,archer:150,wizard:250,giant:400,spearman:180,shield:220};
-  const labels={worker:"عامل",sword:"سياف",archer:"رامٍ",wizard:"ساحر",giant:"عملاق",spearman:"رامح",shield:"مدرّع"};
+  const costs={worker:150,sword:125,archer:300,shield:500,wizard:1200,giant:1500};
+  const unitStats={worker:{hp:100,damage:5,pop:1,range:28,speed:2.7,cooldown:2},sword:{hp:80,damage:12,pop:1,range:34,speed:3.5,cooldown:1},archer:{hp:70,damage:10,pop:1,range:230,speed:2.5,cooldown:2},shield:{hp:400,damage:15,pop:2,range:72,speed:2,cooldown:2},wizard:{hp:144,damage:5,pop:5,range:185,speed:1.6,cooldown:3},giant:{hp:1000,damage:25,pop:4,range:48,speed:1.4,cooldown:3}};
+  const labels={worker:"عامل",sword:"سياف",archer:"رامٍ",wizard:"ساحر",giant:"عملاق",shield:"سبارتون"};
+  const POP_CAP=50;
+  const population=units=>(Array.isArray(units)?units:[]).reduce((n,u)=>n+(unitStats[u.type]?.pop||1),0);
   const show=el=>{[lobby,waiting,gamePanel].forEach(x=>x.classList.add("hidden"));el.classList.remove("hidden");};
   function enterBattleView(requestNative=false){
     gamePanel.classList.add("is-fullscreen");
@@ -31,8 +34,8 @@
   const initialGame=()=>({
     started:false, ended:false, winner:0, baseHp:{1:100,2:100},
     players:{
-      1:{gold:150,units:[],upgrades:{mine:0,attack:0,fort:0}},
-      2:{gold:150,units:[],upgrades:{mine:0,attack:0,fort:0}}
+      1:{gold:500,units:[],upgrades:{mine:0,attack:0,fort:0}},
+      2:{gold:500,units:[],upgrades:{mine:0,attack:0,fort:0}}
     }, tick:0
   });
   function makeCode(){return Math.random().toString(36).slice(2,8).toUpperCase().padEnd(6,"X");}
@@ -262,6 +265,7 @@
     this.add.text(22,18,"⚔",{fontFamily:"Arial",fontSize:"27px",color:"#ffffff"});
     this.add.text(480,18,"ساحة المعركة",{fontFamily:"Cairo, Arial",fontSize:"18px",color:"#ffffff",fontStyle:"bold",stroke:"#38552c",strokeThickness:3}).setOrigin(.5);
     this.unitsLayer=this.add.container(0,0);
+    this.unitViews=new Map();
     this.hud=this.add.text(480,505,"",{fontFamily:"Cairo, Arial",fontSize:"18px",color:"#ffffff",fontStyle:"bold",backgroundColor:"#26351dcc",padding:{x:12,y:6}}).setOrigin(.5);
   }
   function renderGame(gs){
@@ -276,38 +280,48 @@
     gs.baseHp=gs.baseHp||{1:100,2:100};
     latest.game=gs;
     if(scene && scene.unitsLayer){
-      scene.unitsLayer.removeAll(true);
-      [1,2].forEach(side=>gs.players[side].units.forEach(u=>{
+      const liveIds=new Set();
+      [1,2].forEach(side=>gs.players[side].units.forEach((u,index)=>{
+        const id=String(u.id||("legacy_"+side+"_"+index));
+        liveIds.add(id);
         const x=Number.isFinite(u.x)?u.x:(side===1?150:810),y=390;
         const color=side===1?0xf0a92f:0x263b53;
-        const group=scene.add.container(x,y);
-        if(u.type==="giant")group.setScale(side===1?1.8:-1.8,1.8);
-        else group.setScale(side===1?1:-1,1);
-        if(u.type==="shield")group.setScale(side===1?1.12:-1.12,1.12);
-        const shadow=scene.add.ellipse(0,2,30,9,0x243b35,.28);
-        const legs=scene.add.graphics();legs.lineStyle(6,color,1);legs.lineBetween(-4,-8,-11,2);legs.lineBetween(4,-8,11,2);
-        const body=scene.add.rectangle(0,-22,13,28,color).setStrokeStyle(2,0xffffff,.7);
-        const head=scene.add.circle(0,-43,10,0xf1d1a4).setStrokeStyle(2,color);
-        const arms=scene.add.graphics();arms.lineStyle(5,color,1);arms.lineBetween(-4,-29,-17,-19);arms.lineBetween(4,-29,17,-20);
-        group.add([shadow,legs,body,head,arms]);
-        if(u.type==="sword"||u.type==="giant"||u.type==="spearman"){
-          const sword=scene.add.rectangle(20,-27,u.type==="giant"?7:u.type==="spearman"?3:4,u.type==="giant"?38:u.type==="spearman"?43:24,u.type==="spearman"?0xb9c7d2:0xe7edf4).setAngle(u.type==="spearman"?5:25);group.add(sword);
-        }else if(u.type==="archer"){
-          const bow=scene.add.arc(18,-27,10,-85,85,false,0x754b2b).setStrokeStyle(3,0x754b2b);group.add(bow);
-        }else if(u.type==="shield"){
-          group.add(scene.add.rectangle(18,-27,15,24,0x91a8bc).setStrokeStyle(3,0xdce6ee).setAngle(-12));
-        }else if(u.type==="wizard"){
-          group.add(scene.add.triangle(0,-16,0,-4,-17,12,17,12,0x6e55a5));
-          group.add(scene.add.rectangle(19,-30,4,39,0x8a653b).setAngle(8));
-          group.add(scene.add.circle(20,-51,6,0x7be7ff));
-        }else{
-          const tool=scene.add.rectangle(18,-28,4,25,0x8a653b).setAngle(25);group.add(tool);
+        let view=scene.unitViews.get(id);
+        if(!view){
+          const group=scene.add.container(x,y);
+          const shadow=scene.add.ellipse(0,2,30,9,0x243b35,.28);
+          const legs=scene.add.graphics();legs.lineStyle(6,color,1);legs.lineBetween(-4,-8,-11,2);legs.lineBetween(4,-8,11,2);
+          const body=scene.add.rectangle(0,-22,13,28,color).setStrokeStyle(2,0xffffff,.7);
+          const head=scene.add.circle(0,-43,10,0xf1d1a4).setStrokeStyle(2,color);
+          const arms=scene.add.graphics();arms.lineStyle(5,color,1);arms.lineBetween(-4,-29,-17,-19);arms.lineBetween(4,-29,17,-20);
+          group.add([shadow,legs,body,head,arms]);
+          if(u.type==="sword"||u.type==="giant"||u.type==="shield"){
+            group.add(scene.add.rectangle(20,-27,u.type==="giant"?7:4,u.type==="giant"?38:32,u.type==="shield"?0xb9c7d2:0xe7edf4).setAngle(u.type==="shield"?5:25));
+          }else if(u.type==="archer"){
+            group.add(scene.add.arc(18,-27,10,-85,85,false,0x754b2b).setStrokeStyle(3,0x754b2b));
+          }else if(u.type==="wizard"){
+            group.add(scene.add.triangle(0,-16,0,-4,-17,12,17,12,0x6e55a5));
+            group.add(scene.add.rectangle(19,-30,4,39,0x8a653b).setAngle(8));
+            group.add(scene.add.circle(20,-51,6,0x7be7ff));
+          }else{
+            group.add(scene.add.rectangle(18,-28,4,25,0x8a653b).setAngle(25));
+          }
+          const hpBack=scene.add.rectangle(0,-62,30,4,0x3a2830);
+          const hpFill=scene.add.rectangle(-15,-62,30,4,0x5be08a).setOrigin(0,0.5);
+          group.add([hpBack,hpFill]);
+          scene.unitsLayer.add(group);
+          view={group,hpFill};
+          scene.unitViews.set(id,view);
         }
-        const hpPct=Math.max(0,(u.hp??100)/(u.maxHp??100));
-        group.add(scene.add.rectangle(0,-62,26,4,0x3a2830));
-        group.add(scene.add.rectangle(-13+13*hpPct,-62,26*hpPct,4,0x5be08a).setOrigin(0,0.5));
-        scene.unitsLayer.add(group);
+        const facing=side===1?1:-1;
+        const size=u.type==="giant"?1.65:u.type==="shield"?1.15:1;
+        view.group.setPosition(x,y).setScale(facing*size,size);
+        const pct=Math.max(0,Math.min(1,(u.hp??100)/(u.maxHp??unitStats[u.type]?.hp??100)));
+        view.hpFill.width=30*pct;
       }));
+      for(const [id,view] of scene.unitViews){
+        if(!liveIds.has(id)){view.group.destroy();scene.unitViews.delete(id);}
+      }
       const hp1=gs.baseHp?.[player]??100,hp2=gs.baseHp?.[player===1?2:1]??100;
       scene.hud.setText("تمثالك: "+hp1+"%     ⚔     تمثال الخصم: "+hp2+"%");
       const mine=gs.players?.[player]||{upgrades:{}};
@@ -320,7 +334,7 @@
     }
     const mine=gs.players?.[player]||{gold:0,units:[],upgrades:{}};
     const mineUnits=Array.isArray(mine.units)?mine.units:[];
-    $("gold").textContent="🪙 "+(mine.gold??0);$("army").textContent="👥 "+mineUnits.length+"/100";$("baseHealth").textContent="🏰 "+(gs.baseHp?.[player]??100)+"%";
+    $("gold").textContent="🪙 "+(mine.gold??0);$("army").textContent="👥 "+population(mineUnits)+"/"+POP_CAP;$("baseHealth").textContent="🏰 "+(gs.baseHp?.[player]??100)+"%";
     if(gs.ended)$("gameMessage").textContent=gs.winner===player?"🏆 انتصرت!":"💀 خسرت المعركة!";
     else $("gameMessage").textContent="درّب جنودك واهجم على تمثال الخصم!";
   }
@@ -338,14 +352,15 @@
       const playerRef=roomRef.child("game/players/"+player);
       const result=await playerRef.transaction(p=>{
         if(!p||p.gold<costs[type]||latest?.game?.ended)return;
-        if((p.units||[]).length>=100)return;
+        const stat=unitStats[type];
+        if(!stat||population(p.units)>=POP_CAP||population(p.units)+stat.pop>POP_CAP)return;
         p.gold-=costs[type];
         p.units=p.units||[];
-        const maxHp=type==="giant"?260:type==="shield"?175:100;
+        const maxHp=stat.hp;
         p.units.push({type,x:player===1?145:815,hp:maxHp,maxHp,cooldown:0,id:user.uid+"_"+Date.now()+"_"+Math.random().toString(36).slice(2,5)});
         return p;
       },undefined,false);
-      if(!result.committed)$("gameMessage").textContent="الذهب غير كافٍ أو الجيش وصل إلى 100 جندي أو انتهت المباراة.";
+      if(!result.committed)$("gameMessage").textContent="الذهب غير كافٍ أو لا توجد سعة سكانية كافية أو انتهت المباراة.";
     }catch(e){$("gameMessage").textContent="تعذر تدريب الوحدة: "+(e.code||e.message||"تحقق من الاتصال");}
   }
   document.querySelectorAll(".unit-btn").forEach(b=>b.addEventListener("click",()=>train(b.dataset.unit)));
@@ -409,25 +424,26 @@
                 return;
               }
               u.cooldown=Math.max(0,(u.cooldown||0)-1);
-              const foes=gs.players[enemy].units.filter(v=>v.hp>0);
+              const foes=gs.players[enemy].units;
               let target=null,best=Infinity;
-              foes.forEach(v=>{const d=Math.abs(v.x-u.x);if(d<best){best=d;target=v;}});
-              const range=u.type==="archer"?230:u.type==="wizard"?185:u.type==="giant"?48:u.type==="spearman"?72:34;
+              for(let fi=0;fi<foes.length;fi++){const v=foes[fi];if(!v||v.hp<=0)continue;const d=Math.abs(v.x-u.x);if(d<best){best=d;target=v;}}
+              const stat=unitStats[u.type]||unitStats.sword;
+              const range=stat.range;
               if(target&&best<=range){
                 if(u.cooldown===0){
-                  const rawDamage=u.type==="wizard"?24:u.type==="giant"?42:u.type==="archer"?18:u.type==="spearman"?34:u.type==="shield"?15:25;
+                  const rawDamage=stat.damage;
                   const damage=Math.round(rawDamage*(1+(own.upgrades?.attack||0)*0.15));
                   target.hp=Math.max(0,target.hp-damage);
-                  if(u.type==="wizard")foes.filter(v=>v!==target&&Math.abs(v.x-target.x)<55).forEach(v=>v.hp=Math.max(0,v.hp-12));
-                  u.cooldown=u.type==="archer"?2:u.type==="wizard"?3:1;
+                  if(u.type==="wizard"){for(let fi=0;fi<foes.length;fi++){const v=foes[fi];if(v&&v!==target&&v.hp>0&&Math.abs(v.x-target.x)<55)v.hp=Math.max(0,v.hp-Math.round(damage*.45));}}
+                  u.cooldown=stat.cooldown;
                 }
               }else{
-                const speed=u.type==="giant"?2.2:u.type==="archer"?2.5:u.type==="shield"?2:3.5;
+                const speed=stat.speed;
                 u.x=Math.max(95,Math.min(865,u.x+(side===1?1:-1)*speed));
               }
               if(!target||best>range){
                 const atGate=side===1?u.x>=860:u.x<=100;
-                if(atGate&&u.cooldown===0){gs.baseHp[enemy]=Math.max(0,gs.baseHp[enemy]-(u.type==="giant"?18:u.type==="wizard"?9:12));u.cooldown=2;}
+                if(atGate&&u.cooldown===0){gs.baseHp[enemy]=Math.max(0,gs.baseHp[enemy]-(u.type==="giant"?25:u.type==="wizard"?12:15));u.cooldown=2;}
               }
             });
             gs.players[side].units=own.units.filter(u=>u.hp>0);
