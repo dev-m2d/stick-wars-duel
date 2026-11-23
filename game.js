@@ -172,18 +172,18 @@
     else $("gameMessage").textContent="اجمع الذهب ودرّب جيشك!";
   }
   async function train(type){
-    if(!roomRef||!latest||latest.status!=="started")return;
+    if(!roomRef||!latest||latest.status!=="started"||!costs[type])return;
     try{
-      const result=await roomRef.transaction(room=>{
-        if(!room||room.status!=="started"||room.game.ended)return;
-        const p=room.game.players[player];
-        if(!p||p.gold<costs[type])return;
+      const playerRef=roomRef.child("game/players/"+player);
+      const result=await playerRef.transaction(p=>{
+        if(!p||p.gold<costs[type]||latest?.game?.ended)return;
         p.gold-=costs[type];
+        p.units=p.units||[];
         p.units.push({type,x:player===1?90:810,hp:100,id:user.uid+"_"+Date.now()+"_"+Math.random().toString(36).slice(2,5)});
-        return room;
+        return p;
       },undefined,false);
       if(!result.committed)$("gameMessage").textContent="الذهب غير كافٍ أو انتهت المباراة.";
-    }catch(e){$("gameMessage").textContent="تعذر تدريب الوحدة. تحقق من الاتصال.";}
+    }catch(e){$("gameMessage").textContent="تعذر تدريب الوحدة: "+(e.code||e.message||"تحقق من الاتصال");}
   }
   document.querySelectorAll(".unit-btn").forEach(b=>b.addEventListener("click",()=>train(b.dataset.unit)));
   function startHostLoop(){
