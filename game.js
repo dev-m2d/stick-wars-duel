@@ -41,6 +41,12 @@
     roomListener=snap=>{
       if(!snap.exists()){say("الغرفة لم تعد موجودة.",true);show(lobby);return;}
       latest=snap.val();
+      const guestJoined=!!latest.guest;
+      $("playerStatus").textContent=guestJoined
+        ? "🟢 اللاعب الثاني دخل الغرفة"
+        : "🟡 اللاعب الثاني لم يدخل بعد";
+      $("startBtn").disabled=player!==1 || !guestJoined || latest.status!=="waiting";
+      $("startBtn").classList.toggle("is-disabled", $("startBtn").disabled);
       if(latest.status==="started" && gamePanel.classList.contains("hidden")){
         $("gameCode").textContent=roomCode;
         $("matchTitle").textContent="أنت اللاعب "+player;
@@ -49,8 +55,11 @@
       }else if(latest.status==="waiting"){
         $("codeDisplay").textContent=roomCode;
         $("waitingText").textContent=player===2
-          ? "تم دخول الغرفة كلاعب 2. جاري بدء المباراة…"
-          : "أرسل الكود لصديقك. الغرفة تسمح بلاعبين فقط.";
+          ? "تم دخول الغرفة. انتظر صاحب الغرفة ليضغط «ابدأ الجيم»."
+          : guestJoined
+            ? "صاحبك دخل! اضغط «ابدأ الجيم» عندما تكون جاهزًا."
+            : "أرسل الكود لصديقك وانتظر انضمامه.";
+        $("startBtn").classList.toggle("hidden",player!==1);
         show(waiting);
       }else if(latest.status==="finished"){
         $("waitingText").textContent="انتهت الغرفة.";
@@ -85,16 +94,6 @@
       const claim=await roomRef.child("guest").transaction(current=>current===null?user.uid:undefined,undefined,false);
       if(!claim.committed)throw new Error("الغرفة غير موجودة أو اكتمل عدد اللاعبين.");
       player=2;
-      const started = await roomRef.transaction(room=>{
-        if(!room || room.guest!==user.uid || room.status!=="waiting")return;
-        room.status="started";
-        room.game=room.game||initialGame();
-        room.game.started=true;
-        return room;
-      },undefined,false);
-      if(!started.committed){
-        throw new Error("لم يتم بدء المباراة: Firebase لم يقبل تحديث حالة الغرفة. راجع صلاحيات Rules.");
-      }
       watchRoom();
     }catch(e){
       const message=e.message||"تعذر دخول الغرفة. راجع الكود وحاول.";
@@ -103,6 +102,25 @@
         $("waitingText").textContent="خطأ أثناء بدء المباراة: "+message;
         show(waiting);
       }
+    }
+  });
+  $("startBtn").addEventListener("click",async()=>{
+    if(player!==1 || !roomRef || !latest?.guest || latest.status!=="waiting")return;
+    $("startBtn").disabled=true;
+    $("startBtn").textContent="جاري بدء المباراة…";
+    try{
+      const result=await roomRef.transaction(room=>{
+        if(!room || room.host!==user.uid || !room.guest || room.status!=="waiting")return;
+        room.status="started";
+        room.game=room.game||initialGame();
+        room.game.started=true;
+        return room;
+      },undefined,false);
+      if(!result.committed)throw new Error("تعذر بدء المباراة. تأكد أن اللاعب الثاني ما زال متصلًا.");
+    }catch(e){
+      $("waitingText").textContent=e.message||"حدث خطأ أثناء بدء المباراة.";
+      $("startBtn").disabled=false;
+      $("startBtn").textContent="ابدأ الجيم";
     }
   });
   $("cancelBtn").addEventListener("click",async()=>{
