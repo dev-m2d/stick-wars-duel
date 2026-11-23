@@ -17,14 +17,14 @@
   const show=el=>{[lobby,waiting,gamePanel].forEach(x=>x.classList.add("hidden"));el.classList.remove("hidden");};
   function enterBattleView(requestNative=false){
     gamePanel.classList.add("is-fullscreen");
-    document.body.classList.add("battle-open");
+    document.body.classList.add("battle-open","game-active");
     if(requestNative && document.documentElement.requestFullscreen){
       document.documentElement.requestFullscreen().catch(()=>{});
     }
   }
   function leaveBattleView(){
     gamePanel.classList.remove("is-fullscreen");
-    document.body.classList.remove("battle-open");
+    document.body.classList.remove("battle-open","game-active");
     if(document.fullscreenElement && document.exitFullscreen)document.exitFullscreen().catch(()=>{});
   }
   const say=(msg,error=false)=>{status.textContent=msg;status.style.color=error?"#ff8b83":"";};
@@ -159,7 +159,7 @@
         scene:{create:function(){try{return create.call(this);}catch(err){console.error('Battle scene error',err);const box=document.getElementById('game');if(box)box.innerHTML='<div style="padding:18px;color:white;background:#651f2b;direction:rtl">خطأ رسم الساحة: '+(err&&err.stack?err.stack:(err&&err.message?err.message:String(err)))+'</div>';}}}
       };
       game=new Phaser.Game(config);
-      game.events.once("ready",()=>{if(latest?.game)renderGame(latest.game);});
+      game.events.once(Phaser.Core.Events.READY,()=>{if(latest?.game)renderGame(latest.game);});
     }catch(e){
       holder.textContent="تعذر تشغيل ساحة المعركة: "+(e.message||e);
       console.error("Phaser start error",e);
