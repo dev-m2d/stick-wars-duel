@@ -152,7 +152,7 @@
     if(!window.Phaser){holder.textContent="تعذر تحميل محرك اللعبة. تأكد من الإنترنت ثم حدّث الصفحة.";return;}
     try{
       const config={
-        type:Phaser.AUTO,parent:"game",width:960,height:540,
+        type:Phaser.CANVAS,parent:"game",width:960,height:540,
         backgroundColor:"#91cbd7",
         scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},
         render:{antialias:true,pixelArt:false},
