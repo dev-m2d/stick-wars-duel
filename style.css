@@ -70,3 +70,31 @@ body.game-active .game-foot{order:2;flex:0 0 auto;margin:0;min-height:30px;align
 /* Five recruitable unit classes */
 .controls{grid-template-columns:repeat(5,minmax(0,1fr))}
 @media(max-width:650px){.controls{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Stick Wars inspired in-battle top HUD */
+.battlefield-wrap{position:relative;width:100%;height:clamp(340px,62vh,650px);min-height:0;border-radius:14px;overflow:hidden}
+.battlefield-wrap #game{height:100%;min-height:0;border:1px solid #526b7b;border-radius:14px}
+.battle-hud{position:absolute;z-index:5;top:9px;left:10px;right:10px;display:flex;direction:ltr;justify-content:space-between;align-items:flex-start;gap:10px;pointer-events:none}
+.battle-hud .controls{display:flex;direction:ltr;gap:7px;margin:0;pointer-events:auto}
+.battle-hud .unit-btn{width:54px;height:60px;min-height:0;padding:5px 3px;border-radius:15px;background:rgba(13,27,43,.82);border:1px solid rgba(220,235,255,.65);box-shadow:0 3px 10px #0005;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.battle-hud .unit-btn b{font-size:23px;line-height:1.2}
+.battle-hud .unit-btn small{font:800 11px Cairo;color:#ffd45b}
+.battle-status{display:flex;direction:rtl;align-items:center;gap:7px;padding:6px 8px;background:rgba(10,24,39,.82);border:1px solid #ffffff55;border-radius:13px;color:#fff;font:800 13px Cairo;pointer-events:auto;box-shadow:0 3px 10px #0005}
+.battle-status #gold{color:#ffd45b}
+#hudFullscreen{width:34px;height:34px;border:1px solid #ffffff66;border-radius:8px;background:#29445c;color:#fff;font-size:20px}
+.battle-message{position:absolute;z-index:5;bottom:8px;left:50%;transform:translateX(-50%);max-width:90%;padding:5px 12px;border-radius:9px;background:#101d2dcc;color:#fff;font:700 12px Cairo;text-align:center;pointer-events:none;white-space:nowrap}
+body.game-active .battlefield-wrap{flex:1 1 auto;height:auto;min-height:0;width:100%}
+body.game-active .battlefield-wrap #game{height:100%;min-height:0}
+body.game-active .battle-hud .controls{display:flex;grid-template-columns:none}
+@media(max-width:650px){
+ .battlefield-wrap{height:58vh;min-height:340px}
+ .battle-hud{top:6px;left:6px;right:6px;gap:4px}
+ .battle-hud .controls{gap:4px}
+ .battle-hud .unit-btn{width:43px;height:49px;border-radius:12px}
+ .battle-hud .unit-btn b{font-size:19px}
+ .battle-hud .unit-btn small{font-size:9px}
+ .battle-status{gap:4px;padding:4px 5px;font-size:10px}
+ #hudFullscreen{width:29px;height:29px;font-size:17px}
+ .battle-message{font-size:10px;bottom:6px}
+ body.game-active .battlefield-wrap{height:auto;min-height:0}
+}
