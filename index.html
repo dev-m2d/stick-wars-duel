@@ -35,7 +35,10 @@
     </section>
     <section id="waiting" class="panel waiting hidden">
       <div class="loader"></div><span class="tag">غرفتك جاهزة</span><h2>شارك الكود مع خصمك</h2>
-      <div id="codeDisplay" class="code">------</div><p id="waitingText">بانتظار انضمام اللاعب الثاني…</p>
+      <div id="codeDisplay" class="code">------</div>
+      <div id="playerStatus" class="status" aria-live="polite">🟡 اللاعب الثاني لم يدخل بعد</div>
+      <p id="waitingText">شارك الكود مع صديقك وانتظر انضمامه.</p>
+      <button id="startBtn" class="btn primary" disabled>ابدأ الجيم</button>
       <button id="cancelBtn" class="btn secondary">العودة</button>
     </section>
     <section id="gamePanel" class="panel game-panel hidden">
