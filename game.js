@@ -252,6 +252,13 @@
       g.fillStyle(0xc5a33f,1);g.fillCircle(x-8,y-5,4);g.fillCircle(x+7,y-7,5);
     });
 
+    // Two fortresses and their banners frame the battlefield.
+    drawCastle(g,65,0xe0a63f,false);
+    drawCastle(g,895,0x526b86,true);
+    g.fillStyle(0x263b53,1);g.fillRect(48,225,4,48);
+    g.fillStyle(0xf4c451,1);g.fillTriangle(52,227,78,236,52,245);
+    g.fillStyle(0x263b53,1);g.fillRect(908,225,4,48);
+    g.fillStyle(0xe45e57,1);g.fillTriangle(908,227,882,236,908,245);
     this.add.text(22,18,"⚔",{fontFamily:"Arial",fontSize:"27px",color:"#ffffff"});
     this.add.text(480,18,"ساحة المعركة",{fontFamily:"Cairo, Arial",fontSize:"18px",color:"#ffffff",fontStyle:"bold",stroke:"#38552c",strokeThickness:3}).setOrigin(.5);
     this.unitsLayer=this.add.container(0,0);
@@ -267,8 +274,9 @@
         const x=Number.isFinite(u.x)?u.x:(side===1?150:810),y=390;
         const color=side===1?0xf0a92f:0x263b53;
         const group=scene.add.container(x,y);
-        if(u.type==="giant")group.setScale(1.8);
-        if(u.type==="shield")group.setScale(1.12);
+        if(u.type==="giant")group.setScale(side===1?1.8:-1.8,1.8);
+        else group.setScale(side===1?1:-1,1);
+        if(u.type==="shield")group.setScale(side===1?1.12:-1.12,1.12);
         const shadow=scene.add.ellipse(0,2,30,9,0x243b35,.28);
         const legs=scene.add.graphics();legs.lineStyle(6,color,1);legs.lineBetween(-4,-8,-11,2);legs.lineBetween(4,-8,11,2);
         const body=scene.add.rectangle(0,-22,13,28,color).setStrokeStyle(2,0xffffff,.7);
@@ -295,6 +303,13 @@
       }));
       const hp1=gs.baseHp?.[player]??100,hp2=gs.baseHp?.[player===1?2:1]??100;
       scene.hud.setText("تمثالك: "+hp1+"%     ⚔     تمثال الخصم: "+hp2+"%");
+      const mine=gs.players?.[player]||{upgrades:{}};
+      document.querySelectorAll(".upgrade-btn").forEach(btn=>{
+        const level=mine.upgrades?.[btn.dataset.upgrade]||0;
+        btn.classList.toggle("upgrade-max",level>=5);
+        const small=btn.querySelector("small");
+        if(small)small.textContent=level>=5?"MAX":({mine:"300",attack:"350",fort:"400"}[btn.dataset.upgrade])+" • "+level+"/5";
+      });
     }
     const mine=gs.players?.[player]||{gold:0,units:[]};
     $("gold").textContent="🪙 "+mine.gold;$("army").textContent="👥 "+mine.units.length+"/100";$("baseHealth").textContent="🏰 "+(gs.baseHp?.[player]??100)+"%";
