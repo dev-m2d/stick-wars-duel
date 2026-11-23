@@ -294,10 +294,11 @@
       scene.hud.setText("تمثالك: "+hp1+"%     ⚔     تمثال الخصم: "+hp2+"%");
     }
     const mine=gs.players?.[player]||{gold:0,units:[]};
-    $("gold").textContent="🪙 "+mine.gold;$("army").textContent="الجيش: "+mine.units.length;
+    $("gold").textContent="🪙 "+mine.gold;$("army").textContent="👥 "+mine.units.length+"/100";$("baseHealth").textContent="🏰 "+(gs.baseHp?.[player]??100)+"%";
     if(gs.ended)$("gameMessage").textContent=gs.winner===player?"🏆 انتصرت!":"💀 خسرت المعركة!";
     else $("gameMessage").textContent="درّب جنودك واهجم على تمثال الخصم!";
   }
+  $("hudFullscreen").addEventListener("click",()=>$("fullscreenBtn").click());
   $("fullscreenBtn").addEventListener("click",()=>{
     if(!document.fullscreenElement && document.documentElement.requestFullscreen){
       document.documentElement.requestFullscreen().catch(()=>{});
