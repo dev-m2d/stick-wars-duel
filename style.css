@@ -115,3 +115,13 @@ body.game-active .battle-hud .controls{display:flex;grid-template-columns:none}
  .upgrade-btn{font-size:9px;padding:4px 5px}
  .upgrade-btn small{font-size:8px}
 }
+
+.upgrade-btn.upgrade-max{border-color:#59d58a;background:rgba(23,72,55,.92);color:#b9ffd4}
+.battle-upgrades{pointer-events:auto}
+.battlefield-wrap #game canvas{touch-action:pan-x pan-y}
+@media(max-width:380px){
+ .battle-status{font-size:9px;gap:3px}
+ .battle-hud .controls{max-width:65%}
+ .battle-hud .unit-btn{width:34px;height:40px}
+ .upgrade-btn{font-size:8px;padding:3px 4px}
+}
