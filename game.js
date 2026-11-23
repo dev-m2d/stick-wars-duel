@@ -348,7 +348,7 @@
         return p;
       },undefined,false);
       if(result.committed){
-        if(kind==="fort") await roomRef.child("game/baseHp/"+player).transaction(v=>Math.min(200,(v||100)+20));
+        
         $("gameMessage").textContent="تم تطوير "+({mine:"المنجم",attack:"الهجوم",fort:"القلعة"}[kind])+" بنجاح!";
         playRecruitSound();
       }else $("gameMessage").textContent="الذهب غير كافٍ أو وصلت لأقصى مستوى تطوير.";
@@ -363,13 +363,23 @@
       try{
         await roomRef.transaction(room=>{
           if(!room||room.status!=="started"||room.game.ended)return;
-          const gs=room.game;gs.tick=(gs.tick||0)+1;
+          const gs=room.game;gs.tick=(gs.tick||0)+1;gs.baseHp=gs.baseHp||{1:100,2:100};
           [1,2].forEach(side=>{
             const own=gs.players[side],enemy=side===1?2:1;
             own.upgrades=own.upgrades||{mine:0,attack:0,fort:0};
+            gs.baseHp[side]=Math.min(200,Math.max(gs.baseHp[side]||100,100+(own.upgrades.fort||0)*20));
             own.gold+=8+own.units.filter(u=>u.type==="worker").length*(5+2*own.upgrades.mine);
             own.units.forEach(u=>{
-              if(u.type==="worker"||u.hp<=0)return;
+              if(u.hp<=0)return;
+              if(u.type==="worker"){
+                const mineX=side===1?280:680,homeX=side===1?145:815;
+                u.minePhase=u.minePhase||"out";
+                const destination=u.minePhase==="out"?mineX:homeX;
+                const step=side===1?1:-1;
+                if(Math.abs(destination-u.x)<7){u.x=destination;u.minePhase=u.minePhase==="out"?"back":"out";}
+                else u.x+=step*5;
+                return;
+              }
               u.cooldown=Math.max(0,(u.cooldown||0)-1);
               const foes=gs.players[enemy].units.filter(v=>v.hp>0);
               let target=null,best=Infinity;
