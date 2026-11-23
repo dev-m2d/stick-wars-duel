@@ -230,7 +230,7 @@
         }else if(u.type==="archer"){
           const bow=scene.add.arc(18,-27,10,-85,85,false,0x754b2b).setStrokeStyle(3,0x754b2b);group.add(bow);
         }else if(u.type==="wizard"){
-          group.add(scene.add.triangle(0,-16,0,-4,-17,12,17,0x6e55a5));
+          group.add(scene.add.triangle(0,-16,0,-4,-17,12,17,12,0x6e55a5));
           group.add(scene.add.rectangle(19,-30,4,39,0x8a653b).setAngle(8));
           group.add(scene.add.circle(20,-51,6,0x7be7ff));
         }else{
