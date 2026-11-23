@@ -66,3 +66,7 @@ body.game-active .game-foot{order:2;flex:0 0 auto;margin:0;min-height:30px;align
  body.game-active .unit-btn{min-height:46px;border-radius:9px}
  body.game-active .game-foot{gap:6px 12px}
 }
+
+/* Five recruitable unit classes */
+.controls{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media(max-width:650px){.controls{grid-template-columns:repeat(3,minmax(0,1fr))}}
