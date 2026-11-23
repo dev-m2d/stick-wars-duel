@@ -225,13 +225,20 @@
         const head=scene.add.circle(0,-43,10,0xf1d1a4).setStrokeStyle(2,color);
         const arms=scene.add.graphics();arms.lineStyle(5,color,1);arms.lineBetween(-4,-29,-17,-19);arms.lineBetween(4,-29,17,-20);
         group.add([shadow,legs,body,head,arms]);
-        if(u.type==="sword"){
-          const sword=scene.add.rectangle(20,-27,4,24,0xe7edf4).setAngle(25);group.add(sword);
+        if(u.type==="sword"||u.type==="giant"){
+          const sword=scene.add.rectangle(20,-27,u.type==="giant"?7:4,u.type==="giant"?38:24,0xe7edf4).setAngle(25);group.add(sword);
         }else if(u.type==="archer"){
           const bow=scene.add.arc(18,-27,10,-85,85,false,0x754b2b).setStrokeStyle(3,0x754b2b);group.add(bow);
+        }else if(u.type==="wizard"){
+          group.add(scene.add.triangle(0,-16,0,-4,-17,12,17,0x6e55a5));
+          group.add(scene.add.rectangle(19,-30,4,39,0x8a653b).setAngle(8));
+          group.add(scene.add.circle(20,-51,6,0x7be7ff));
         }else{
           const tool=scene.add.rectangle(18,-28,4,25,0x8a653b).setAngle(25);group.add(tool);
         }
+        const hpPct=Math.max(0,(u.hp??100)/(u.maxHp??100));
+        group.add(scene.add.rectangle(0,-62,26,4,0x3a2830));
+        group.add(scene.add.rectangle(-13+13*hpPct,-62,26*hpPct,4,0x5be08a).setOrigin(0,0.5));
         scene.unitsLayer.add(group);
       }));
       const hp1=gs.baseHp?.[player]??100,hp2=gs.baseHp?.[player===1?2:1]??100;
