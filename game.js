@@ -12,8 +12,8 @@
     appId:"1:1087007888495:web:344ea8e25bc49e01c5e99a"
   };
   let db, user=null, roomRef=null, roomCode="", player=0, game=null, scene=null, roomListener=null, hostTimer=null, latest=null;
-  const costs={worker:50,sword:100,archer:150};
-  const labels={worker:"عامل",sword:"سياف",archer:"رامٍ"};
+  const costs={worker:50,sword:100,archer:150,wizard:250,giant:400};
+  const labels={worker:"عامل",sword:"سياف",archer:"رامٍ",wizard:"ساحر",giant:"عملاق"};
   const show=el=>{[lobby,waiting,gamePanel].forEach(x=>x.classList.add("hidden"));el.classList.remove("hidden");};
   function enterBattleView(requestNative=false){
     gamePanel.classList.add("is-fullscreen");
@@ -218,6 +218,7 @@
         const x=Number.isFinite(u.x)?u.x:(side===1?150:810),y=390;
         const color=side===1?0xf0a92f:0x263b53;
         const group=scene.add.container(x,y);
+        if(u.type==="giant")group.setScale(1.8);
         const shadow=scene.add.ellipse(0,2,30,9,0x243b35,.28);
         const legs=scene.add.graphics();legs.lineStyle(6,color,1);legs.lineBetween(-4,-8,-11,2);legs.lineBetween(4,-8,11,2);
         const body=scene.add.rectangle(0,-22,13,28,color).setStrokeStyle(2,0xffffff,.7);
@@ -256,7 +257,7 @@
         if(!p||p.gold<costs[type]||latest?.game?.ended)return;
         p.gold-=costs[type];
         p.units=p.units||[];
-        p.units.push({type,x:player===1?150:810,hp:100,id:user.uid+"_"+Date.now()+"_"+Math.random().toString(36).slice(2,5)});
+        p.units.push({type,x:player===1?145:815,hp:type==="giant"?260:100,maxHp:type==="giant"?260:100,cooldown:0,id:user.uid+"_"+Date.now()+"_"+Math.random().toString(36).slice(2,5)});
         return p;
       },undefined,false);
       if(!result.committed)$("gameMessage").textContent="الذهب غير كافٍ أو انتهت المباراة.";
@@ -273,10 +274,31 @@
           const gs=room.game;gs.tick=(gs.tick||0)+1;
           [1,2].forEach(side=>{
             const own=gs.players[side],enemy=side===1?2:1;
-            own.gold+=8+own.units.filter(u=>u.type==="worker").length*4;
-            own.units.forEach(u=>{if(u.type!=="worker")u.x=Math.max(90,Math.min(870,u.x+(side===1?1:-1)*(u.type==="sword"?5:2)));});
-            const damage=own.units.filter(u=>u.type!=="worker"&&(side===1?u.x>=860:u.x<=100)).length;
-            gs.baseHp[enemy]=Math.max(0,gs.baseHp[enemy]-damage);
+            own.gold+=8+own.units.filter(u=>u.type==="worker").length*5;
+            own.units.forEach(u=>{
+              if(u.type==="worker"||u.hp<=0)return;
+              u.cooldown=Math.max(0,(u.cooldown||0)-1);
+              const foes=gs.players[enemy].units.filter(v=>v.hp>0);
+              let target=null,best=Infinity;
+              foes.forEach(v=>{const d=Math.abs(v.x-u.x);if(d<best){best=d;target=v;}});
+              const range=u.type==="archer"?230:u.type==="wizard"?185:u.type==="giant"?48:34;
+              if(target&&best<=range){
+                if(u.cooldown===0){
+                  const damage=u.type==="wizard"?24:u.type==="giant"?42:u.type==="archer"?18:25;
+                  target.hp=Math.max(0,target.hp-damage);
+                  if(u.type==="wizard")foes.filter(v=>v!==target&&Math.abs(v.x-target.x)<55).forEach(v=>v.hp=Math.max(0,v.hp-12));
+                  u.cooldown=u.type==="archer"?2:u.type==="wizard"?3:1;
+                }
+              }else{
+                const speed=u.type==="giant"?2.2:u.type==="archer"?2.5:3.5;
+                u.x=Math.max(95,Math.min(865,u.x+(side===1?1:-1)*speed));
+              }
+              if(!target||best>range){
+                const atGate=side===1?u.x>=860:u.x<=100;
+                if(atGate&&u.cooldown===0){gs.baseHp[enemy]=Math.max(0,gs.baseHp[enemy]-(u.type==="giant"?18:u.type==="wizard"?9:12));u.cooldown=2;}
+              }
+            });
+            gs.players[side].units=own.units.filter(u=>u.hp>0);
           });
           if(gs.baseHp[1]<=0||gs.baseHp[2]<=0){gs.ended=true;gs.winner=gs.baseHp[1]<=0?2:1;room.status="finished";}
           return room;
