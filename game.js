@@ -180,33 +180,82 @@
   function create(){
     scene=this;
     const g=this.add.graphics();
-    // Bright sky, distant hills and a clear battlefield floor.
-    g.fillStyle(0x9acbd9,1);
-    g.fillRect(0,0,960,540);
-    g.fillStyle(0xffe39a,1);g.fillCircle(480,112,48);
-    g.fillStyle(0xffffff,.58);
-    [[170,105,35],[205,100,28],[235,108,22],[720,130,30],[752,122,24],[780,132,20]].forEach(v=>g.fillCircle(v[0],v[1],v[2]));
-    g.fillStyle(0x78a9a0,1);
-    g.fillTriangle(0,330,170,145,350,330);g.fillTriangle(250,330,485,165,710,330);g.fillTriangle(610,330,805,150,960,330);
-    g.fillStyle(0x6c9c67,1);g.fillRect(0,390,960,150);
-    g.fillStyle(0xdec58f,1);g.fillRect(0,418,960,122);
-    g.fillStyle(0xc8ad76,1);g.fillRect(0,444,960,8);
-    g.fillStyle(0x5c8755,1);g.fillRect(0,390,960,13);
-    drawCastle(g,65,0x667f91,false);drawCastle(g,895,0x53677e,true);
-    // Decorative guardian statues beside both castles.
-    [125,835].forEach((x,i)=>{
-      const col=i===0?0xf2bd51:0x263b53;
-      g.fillStyle(0x9a8969,1);g.fillRect(x-15,350,30,52);
-      g.fillStyle(col,1);g.fillCircle(x,333,12);g.fillRect(x-8,344,16,30);
-      g.fillRect(x-22,354,8,24);g.fillRect(x+14,354,8,24);
-      g.fillStyle(0x6b5b43,1);g.fillRect(x-22,400,44,9);
+
+    // Layered blue sky and bright sun.
+    for(let i=0;i<18;i++){
+      const c=Math.round(160+i*4);
+      g.fillStyle((c<<16)|(Math.min(225,c+24)<<8)|Math.min(245,c+38),1);
+      g.fillRect(0,i*13,960,14);
+    }
+    g.fillStyle(0xfff4c8,1);g.fillCircle(480,76,76);
+    g.fillStyle(0xffffff,.18);g.fillCircle(480,76,91);
+
+    // Soft clouds.
+    [[110,95],[175,118],[735,83],[800,105],[885,128]].forEach(([x,y])=>{
+      g.fillStyle(0xffffff,.82);
+      g.fillCircle(x,y,18);g.fillCircle(x+19,y-8,23);g.fillCircle(x+43,y,16);
+      g.fillRect(x,y,43,16);
     });
-    this.add.text(22,24,"قلعتك",{fontFamily:"Cairo, Arial",fontSize:"20px",color:"#20354a",fontStyle:"bold"});
-    this.add.text(830,24,"قلعة الخصم",{fontFamily:"Cairo, Arial",fontSize:"20px",color:"#20354a",fontStyle:"bold"});
-    this.add.text(480,465,"منجم الذهب",{fontFamily:"Cairo, Arial",fontSize:"18px",color:"#72562b",fontStyle:"bold"}).setOrigin(.5);
-    this.add.circle(480,420,15,0xf1bd4d).setStrokeStyle(4,0x9a702f);
+
+    // Far mountains and green rolling hills.
+    g.fillStyle(0x8295a0,1);
+    [[0,270,130,145],[100,275,270,128],[280,270,440,152],[520,275,690,130],[720,270,900,145],[850,275,1040,125]].forEach(v=>g.fillTriangle(v[0],v[1],v[2],v[3],v[4],v[1]));
+    g.fillStyle(0x9abf55,1);
+    g.fillEllipse(125,286,390,125);g.fillEllipse(390,286,430,135);g.fillEllipse(740,282,470,145);
+    g.fillStyle(0x6f9d3d,1);
+    g.fillEllipse(35,310,300,105);g.fillEllipse(300,305,380,100);g.fillEllipse(660,308,420,105);g.fillEllipse(930,305,260,100);
+
+    // Pine trees across the horizon.
+    const pine=(x,y,scale)=>{
+      g.fillStyle(0x684a2e,1);g.fillRect(x-5*scale,y-5*scale,10*scale,45*scale);
+      g.fillStyle(0x244f2d,1);
+      g.fillTriangle(x,y-105*scale,x-34*scale,y-22*scale,x+34*scale,y-22*scale);
+      g.fillStyle(0x326b36,1);
+      g.fillTriangle(x,y-82*scale,x-39*scale,y+2*scale,x+39*scale,y+2*scale);
+      g.fillStyle(0x477f3a,1);
+      g.fillTriangle(x,y-58*scale,x-32*scale,y+18*scale,x+32*scale,y+18*scale);
+    };
+    [[80,310,.95],[190,300,.72],[315,310,1.05],[640,305,.9],[795,310,1.08],[900,305,.75]].forEach(v=>pine(v[0],v[1],v[2]));
+
+    // Dirt battlefield with grassy edge, texture and small stones.
+    g.fillStyle(0x738b2d,1);g.fillRect(0,326,960,28);
+    g.fillStyle(0x9b9137,1);g.fillRect(0,345,960,195);
+    g.fillStyle(0x897c32,1);g.fillEllipse(480,420,1120,220);
+    g.fillStyle(0xb0a047,.45);
+    for(let i=0;i<85;i++){
+      const x=(i*137)%960,y=365+((i*71)%165);
+      g.fillCircle(x,y,1+(i%3));
+    }
+    g.fillStyle(0x4f7c31,1);
+    for(let i=0;i<75;i++){
+      const x=(i*83)%960;
+      g.fillRect(x,333+(i%4)*3,2+(i%3),8+(i%5)*2);
+    }
+
+    // Gold seams and bright crystal clusters.
+    const crystals=(x,y,scale)=>{
+      g.fillStyle(0xd28b18,1);
+      g.fillTriangle(x-22*scale,y+12*scale,x-8*scale,y-20*scale,x+2*scale,y+12*scale);
+      g.fillTriangle(x-4*scale,y+12*scale,x+10*scale,y-28*scale,x+19*scale,y+12*scale);
+      g.fillTriangle(x+10*scale,y+12*scale,x+25*scale,y-13*scale,x+31*scale,y+12*scale);
+      g.fillStyle(0xffd52d,1);
+      g.fillTriangle(x-8*scale,y-20*scale,x-4*scale,y+12*scale,x+2*scale,y+12*scale);
+      g.fillTriangle(x+10*scale,y-28*scale,x+13*scale,y+12*scale,x+19*scale,y+12*scale);
+      g.fillStyle(0xfff18a,.9);
+      g.fillTriangle(x+10*scale,y-28*scale,x+10*scale,y-8*scale,x+16*scale,y-15*scale);
+    };
+    [[445,390,.8],[520,426,1],[690,410,.9],[825,386,.85]].forEach(v=>crystals(v[0],v[1],v[2]));
+
+    // Small mining mounds.
+    [[265,438],[575,465],[760,455]].forEach(([x,y])=>{
+      g.fillStyle(0x65552d,1);g.fillEllipse(x,y,48,13);
+      g.fillStyle(0xc5a33f,1);g.fillCircle(x-8,y-5,4);g.fillCircle(x+7,y-7,5);
+    });
+
+    this.add.text(22,18,"⚔",{fontFamily:"Arial",fontSize:"27px",color:"#ffffff"});
+    this.add.text(480,18,"ساحة المعركة",{fontFamily:"Cairo, Arial",fontSize:"18px",color:"#ffffff",fontStyle:"bold",stroke:"#38552c",strokeThickness:3}).setOrigin(.5);
     this.unitsLayer=this.add.container(0,0);
-    this.hud=this.add.text(480,66,"",{fontFamily:"Cairo, Arial",fontSize:"19px",color:"#20354a",fontStyle:"bold",backgroundColor:"#ffffff99",padding:{x:12,y:7}}).setOrigin(.5);
+    this.hud=this.add.text(480,505,"",{fontFamily:"Cairo, Arial",fontSize:"18px",color:"#ffffff",fontStyle:"bold",backgroundColor:"#26351dcc",padding:{x:12,y:6}}).setOrigin(.5);
     if(latest?.game)renderGame(latest.game);
   }
   function renderGame(gs){
