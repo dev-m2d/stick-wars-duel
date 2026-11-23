@@ -43,7 +43,7 @@
   }
   async function ensureFirebase(){
     if(!window.firebase) throw new Error("تعذر تحميل Firebase. تأكد من اتصال الإنترنت ثم حدّث الصفحة.");
-    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    if(!Array.isArray(firebase.apps) || firebase.apps.length===0) firebase.initializeApp(firebaseConfig);
     db=firebase.database();
     if(!user){const cred=await firebase.auth().signInAnonymously();user=cred.user;}
     return user;
@@ -156,7 +156,7 @@
         backgroundColor:"#91cbd7",
         scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},
         render:{antialias:true,pixelArt:false},
-        scene:{create:function(){try{return create.call(this);}catch(err){console.error('Battle scene error',err);const box=document.getElementById('game');if(box)box.innerHTML='<div style="padding:18px;color:white;background:#651f2b;direction:rtl">خطأ رسم الساحة: '+(err&&err.message?err.message:String(err))+'</div>';}}}
+        scene:{create:function(){try{return create.call(this);}catch(err){console.error('Battle scene error',err);const box=document.getElementById('game');if(box)box.innerHTML='<div style="padding:18px;color:white;background:#651f2b;direction:rtl">خطأ رسم الساحة: '+(err&&err.stack?err.stack:(err&&err.message?err.message:String(err)))+'</div>';}}}
       };
       game=new Phaser.Game(config);
       game.events.once("ready",()=>{if(latest?.game)renderGame(latest.game);});
@@ -263,7 +263,6 @@
     this.add.text(480,18,"ساحة المعركة",{fontFamily:"Cairo, Arial",fontSize:"18px",color:"#ffffff",fontStyle:"bold",stroke:"#38552c",strokeThickness:3}).setOrigin(.5);
     this.unitsLayer=this.add.container(0,0);
     this.hud=this.add.text(480,505,"",{fontFamily:"Cairo, Arial",fontSize:"18px",color:"#ffffff",fontStyle:"bold",backgroundColor:"#26351dcc",padding:{x:12,y:6}}).setOrigin(.5);
-    if(latest?.game)renderGame(latest.game);
   }
   function renderGame(gs){
     if(!gs)return;
