@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#101827">
+  <title>Stick Wars: Duel</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div class="brand-mark">⚔</div>
+      <div><p class="eyebrow">معركة لاعبين • أونلاين</p><h1>STICK WARS <span>DUEL</span></h1></div>
+      <div class="online"><i></i> DUEL MODE</div>
+    </header>
+
+    <section id="lobby" class="panel lobby">
+      <div class="hero">
+        <div class="hero-copy"><span class="tag">استعد للمعركة</span><h2>قائد واحد…<br><em>وانتصار واحد.</em></h2>
+          <p>اجمع الذهب، درّب جيشك، ودمّر تمثال خصمك قبل أن يصل إلى قلعتك.</p></div>
+        <div class="hero-art"><div class="sun"></div><div class="mountain m1"></div><div class="mountain m2"></div>
+          <div class="stick s1"><b></b><i></i><u></u></div><div class="stick s2"><b></b><i></i><u></u></div></div>
+      </div>
+      <div class="lobby-grid">
+        <article class="card"><div class="card-icon">＋</div><h3>إنشاء غرفة</h3><p>أنشئ ساحة خاصة وشارك الكود مع صديقك.</p><button id="createBtn" class="btn primary">إنشاء غرفة <span>←</span></button></article>
+        <article class="card"><div class="card-icon">⌁</div><h3>دخول غرفة</h3><p>معك كود من صديقك؟ ادخل المعركة فورًا.</p>
+          <input id="roomCode" maxlength="6" placeholder="اكتب كود الغرفة" inputmode="numeric" autocomplete="off">
+          <button id="joinBtn" class="btn secondary">دخول الغرفة <span>←</span></button></article>
+      </div>
+      <p id="status" class="status">جهّز جيشك… المعركة في انتظارك.</p>
+      <label class="server-label">رابط سيرفر اللعب (نحتاجه لتفعيل الأونلاين)
+        <input id="serverUrl" placeholder="https://your-server.onrender.com" autocomplete="url">
+      </label>
+    </section>
+
+    <section id="waiting" class="panel waiting hidden">
+      <div class="loader"></div><span class="tag">غرفتك جاهزة</span><h2>شارك الكود مع خصمك</h2>
+      <div id="codeDisplay" class="code">------</div><p id="waitingText">بانتظار انضمام اللاعب الثاني…</p>
+      <button id="cancelBtn" class="btn secondary">العودة</button>
+    </section>
+
+    <section id="gamePanel" class="panel game-panel hidden">
+      <div class="game-head"><div><span class="tag">ساحة المعركة</span><h2 id="matchTitle">اللاعب 1 ضد اللاعب 2</h2></div><div class="room-chip">غرفة <b id="gameCode"></b></div></div>
+      <div id="game"></div>
+      <div class="controls">
+        <button data-unit="worker" class="unit-btn">👷 عامل <small>50 ذهب</small></button>
+        <button data-unit="sword" class="unit-btn">⚔️ سياف <small>100 ذهب</small></button>
+        <button data-unit="archer" class="unit-btn">🏹 رامٍ <small>150 ذهب</small></button>
+      </div>
+      <div class="game-foot"><span id="gold">🪙 150</span><span id="army">الجيش: 0</span><span id="gameMessage">اجمع الذهب ودرّب جيشك!</span></div>
+    </section>
+    <footer>STICK WARS: DUEL <span>مصممة للقتال بين صديقين</span></footer>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
