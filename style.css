@@ -15,3 +15,32 @@ input{width:100%;background:#0b1523;border:1px solid #354b67;color:white;border-
 #game{width:100%;min-height:240px;border-radius:14px;overflow:hidden;background:#9ac8d1}#game canvas{display:block;width:100%!important;height:auto!important}.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.unit-btn{border:1px solid #3a506b;border-radius:12px;background:#1b2d43;color:white;padding:12px 5px;font:800 13px Cairo;cursor:pointer}.unit-btn small{display:block;color:var(--gold);font-size:11px}.game-foot{display:flex;justify-content:space-between;gap:10px;color:#b6c5d5;font-size:12px;margin-top:15px}#gold{color:var(--gold);font-weight:900}
 footer{display:flex;justify-content:space-between;color:#60748e;font:600 10px Orbitron;padding:18px 5px}footer span{font:12px Cairo}
 @media(max-width:650px){body{padding:12px}.top h1{font-size:16px}.online{font-size:8px}.hero{min-height:230px;padding:24px}.hero-copy{max-width:72%}.hero h2{font-size:29px}.hero p{font-size:12px}.hero-art{width:45%;opacity:.8}.lobby-grid{grid-template-columns:1fr;padding:14px}.card{padding:17px}.game-panel{padding:12px}.game-foot{font-size:10px;flex-wrap:wrap}.controls{gap:6px}.unit-btn{font-size:11px}.code{font-size:32px;letter-spacing:6px}footer span{font-size:10px}}
+
+
+/* Battle screen: responsive canvas, top unit bar and immersive mode */
+.game-head-actions{display:flex;align-items:center;gap:8px}
+.screen-btn{border:1px solid #526987;background:#213650;color:#fff;border-radius:10px;padding:8px 12px;font:700 12px Cairo;cursor:pointer;white-space:nowrap}
+.controls{margin:0 0 10px;grid-template-columns:repeat(3,minmax(0,1fr))}
+#game{width:100%;height:clamp(280px,58vh,620px);min-height:280px;border:1px solid #526987;background:#8fc6d2;position:relative}
+#game canvas{display:block;width:100%!important;height:100%!important;object-fit:contain}
+.game-foot{align-items:center;flex-wrap:wrap}
+.game-panel.is-fullscreen{position:fixed;inset:0;z-index:9999;width:100%;height:100%;height:100dvh;max-width:none;margin:0;border:0;border-radius:0;padding:10px;background:#101b2b;display:flex;flex-direction:column;overflow:hidden}
+.game-panel.is-fullscreen .game-head{flex:0 0 auto;margin-bottom:8px}
+.game-panel.is-fullscreen .controls{flex:0 0 auto;margin-bottom:8px}
+.game-panel.is-fullscreen #game{flex:1 1 auto;height:auto;min-height:0}
+.game-panel.is-fullscreen .game-foot{flex:0 0 auto;margin-top:8px;padding-bottom:env(safe-area-inset-bottom)}
+body.battle-open{overflow:hidden;padding:0}
+body.battle-open .shell{max-width:none;margin:0}
+body.battle-open .top,body.battle-open footer{display:none}
+body.battle-open .game-panel{box-shadow:none}
+@media(max-width:650px){
+  .game-head{gap:8px}.game-head h2{font-size:16px}.game-head-actions{gap:5px}.room-chip{padding:6px 8px;font-size:10px}.screen-btn{font-size:11px;padding:7px 9px}
+  #game{height:44vh;min-height:250px}
+  .game-panel.is-fullscreen{padding:7px}
+  .game-panel.is-fullscreen .controls{gap:5px}
+  .unit-btn{padding:8px 3px}
+  .game-foot{gap:7px;font-size:11px}
+}
+@media(orientation:portrait) and (max-width:650px){
+  .game-panel.is-fullscreen #game{min-height:0}
+}
