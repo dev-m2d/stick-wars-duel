@@ -98,3 +98,20 @@ body.game-active .battle-hud .controls{display:flex;grid-template-columns:none}
  .battle-message{font-size:10px;bottom:6px}
  body.game-active .battlefield-wrap{height:auto;min-height:0}
 }
+
+/* Expanded army and upgrade HUD */
+.battle-hud .controls{display:flex;flex-wrap:wrap;max-width:min(64%,520px);gap:5px}
+.battle-hud .unit-btn{width:47px;height:53px}
+.battle-upgrades{position:absolute;z-index:6;right:10px;bottom:40px;display:flex;gap:5px;max-width:75%;justify-content:flex-end;pointer-events:auto}
+.upgrade-btn{border:1px solid #d9bd70;background:rgba(21,37,48,.9);color:#fff;border-radius:9px;padding:5px 8px;font:700 10px Cairo;box-shadow:0 2px 8px #0005;touch-action:manipulation}
+.upgrade-btn small{display:block;color:#ffd45b;font-size:9px}
+.battle-status{flex-wrap:wrap;justify-content:center}
+@media(max-width:650px){
+ .battle-hud .controls{max-width:67%;gap:3px}
+ .battle-hud .unit-btn{width:37px;height:43px;border-radius:10px}
+ .battle-hud .unit-btn b{font-size:17px}
+ .battle-hud .unit-btn small{font-size:8px}
+ .battle-upgrades{right:5px;bottom:34px;gap:3px;max-width:80%}
+ .upgrade-btn{font-size:9px;padding:4px 5px}
+ .upgrade-btn small{font-size:8px}
+}
