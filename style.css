@@ -44,3 +44,25 @@ body.battle-open .game-panel{box-shadow:none}
 @media(orientation:portrait) and (max-width:650px){
   .game-panel.is-fullscreen #game{min-height:0}
 }
+
+
+/* Immersive battlefield layout */
+body.game-active{padding:0;overflow:hidden;background:#0b1421}
+body.game-active .top,body.game-active footer{display:none}
+body.game-active .shell{width:100%;max-width:none;margin:0}
+body.game-active .game-panel{position:fixed;inset:0;z-index:1000;width:100%;height:100vh;height:100dvh;border:0;border-radius:0;padding:clamp(8px,1.5vw,18px);display:flex;flex-direction:column;gap:8px;overflow:hidden;background:linear-gradient(180deg,#17283b,#0c1726)}
+body.game-active .game-head{flex:0 0 auto;margin:0;min-height:42px}
+body.game-active .game-head h2{font-size:clamp(15px,2.2vw,22px)}
+body.game-active .controls{order:0;flex:0 0 auto;margin:0;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+body.game-active .unit-btn{min-height:48px;padding:6px 4px;font-size:clamp(11px,1.7vw,15px);touch-action:manipulation}
+body.game-active #game{order:1;flex:1 1 auto;min-height:0;width:100%;height:100%;border:1px solid #526b7b;border-radius:12px;background:#9dcbd1;overflow:hidden;position:relative}
+body.game-active #game canvas{display:block!important;width:100%!important;height:100%!important;object-fit:fill}
+body.game-active .game-foot{order:2;flex:0 0 auto;margin:0;min-height:30px;align-items:center;flex-wrap:wrap;font-size:clamp(10px,1.5vw,13px)}
+@media(max-width:650px){
+ body.game-active .game-panel{padding:7px;gap:6px}
+ body.game-active .game-head{min-height:34px}
+ body.game-active .room-chip{padding:4px 8px;font-size:10px}
+ body.game-active .controls{gap:5px}
+ body.game-active .unit-btn{min-height:46px;border-radius:9px}
+ body.game-active .game-foot{gap:6px 12px}
+}
