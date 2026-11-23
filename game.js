@@ -83,12 +83,26 @@
       const claim=await roomRef.child("guest").transaction(current=>current===null?user.uid:undefined,undefined,false);
       if(!claim.committed)throw new Error("الغرفة غير موجودة أو اكتمل عدد اللاعبين.");
       player=2;
-      await roomRef.transaction(room=>{
+      const started = await roomRef.transaction(room=>{
         if(!room || room.guest!==user.uid || room.status!=="waiting")return;
-        room.status="started";room.game.started=true;return room;
+        room.status="started";
+        room.game=room.game||initialGame();
+        room.game.started=true;
+        return room;
       },undefined,false);
+      if(!started.committed){
+        throw new Error("تم حجز مكانك، لكن تعذر بدء المباراة. أعد المحاولة أو أنشئ غرفة جديدة.");
+      }
+      player=2;
       watchRoom();
-    }catch(e){say(e.message||"تعذر دخول الغرفة. راجع الكود وحاول.",true);}
+    }catch(e){
+      const message=e.message||"تعذر دخول الغرفة. راجع الكود وحاول.";
+      say(message,true);
+      if(roomRef && player===2){
+        $("waitingText").textContent=message;
+        show(waiting);
+      }
+    }
   });
   $("cancelBtn").addEventListener("click",async()=>{
     stopListeners();
