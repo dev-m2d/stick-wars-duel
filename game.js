@@ -267,10 +267,18 @@
   }
   function renderGame(gs){
     if(!gs)return;
+    gs.players=gs.players||{};
+    [1,2].forEach(side=>{
+      gs.players[side]=gs.players[side]||{gold:150,units:[],upgrades:{mine:0,attack:0,fort:0}};
+      if(!Array.isArray(gs.players[side].units))gs.players[side].units=[];
+      if(!Number.isFinite(gs.players[side].gold))gs.players[side].gold=150;
+      gs.players[side].upgrades=gs.players[side].upgrades||{mine:0,attack:0,fort:0};
+    });
+    gs.baseHp=gs.baseHp||{1:100,2:100};
     latest.game=gs;
     if(scene && scene.unitsLayer){
       scene.unitsLayer.removeAll(true);
-      [1,2].forEach(side=>(gs.players?.[side]?.units||[]).forEach(u=>{
+      [1,2].forEach(side=>gs.players[side].units.forEach(u=>{
         const x=Number.isFinite(u.x)?u.x:(side===1?150:810),y=390;
         const color=side===1?0xf0a92f:0x263b53;
         const group=scene.add.container(x,y);
@@ -311,8 +319,9 @@
         if(small)small.textContent=level>=5?"MAX":({mine:"300",attack:"350",fort:"400"}[btn.dataset.upgrade])+" • "+level+"/5";
       });
     }
-    const mine=gs.players?.[player]||{gold:0,units:[]};
-    $("gold").textContent="🪙 "+mine.gold;$("army").textContent="👥 "+mine.units.length+"/100";$("baseHealth").textContent="🏰 "+(gs.baseHp?.[player]??100)+"%";
+    const mine=gs.players?.[player]||{gold:0,units:[],upgrades:{}};
+    const mineUnits=Array.isArray(mine.units)?mine.units:[];
+    $("gold").textContent="🪙 "+(mine.gold??0);$("army").textContent="👥 "+mineUnits.length+"/100";$("baseHealth").textContent="🏰 "+(gs.baseHp?.[player]??100)+"%";
     if(gs.ended)$("gameMessage").textContent=gs.winner===player?"🏆 انتصرت!":"💀 خسرت المعركة!";
     else $("gameMessage").textContent="درّب جنودك واهجم على تمثال الخصم!";
   }
@@ -378,12 +387,17 @@
       try{
         await roomRef.transaction(room=>{
           if(!room||room.status!=="started"||room.game.ended)return;
-          const gs=room.game;gs.tick=(gs.tick||0)+1;gs.baseHp=gs.baseHp||{1:100,2:100};
+          const gs=room.game;gs.tick=(gs.tick||0)+1;gs.baseHp=gs.baseHp||{1:100,2:100};gs.players=gs.players||{};
           [1,2].forEach(side=>{
+            gs.players[side]=gs.players[side]||{gold:150,units:[],upgrades:{mine:0,attack:0,fort:0}};
             const own=gs.players[side],enemy=side===1?2:1;
+            own.units=Array.isArray(own.units)?own.units:[];
+            own.gold=Number.isFinite(own.gold)?own.gold:150;
             own.upgrades=own.upgrades||{mine:0,attack:0,fort:0};
+            gs.players[enemy]=gs.players[enemy]||{gold:150,units:[],upgrades:{mine:0,attack:0,fort:0}};
+            gs.players[enemy].units=Array.isArray(gs.players[enemy].units)?gs.players[enemy].units:[];
             gs.baseHp[side]=Math.min(200,Math.max(gs.baseHp[side]||100,100+(own.upgrades.fort||0)*20));
-            own.gold+=8+own.units.filter(u=>u.type==="worker").length*(5+2*own.upgrades.mine);
+            own.gold+=8+own.units.filter(u=>u&&u.type==="worker").length*(5+2*own.upgrades.mine);
             own.units.forEach(u=>{
               if(u.hp<=0)return;
               if(u.type==="worker"){
