@@ -164,7 +164,7 @@
           [1,2].forEach(side=>{
             const own=gs.players[side],enemy=side===1?2:1;
             own.gold+=8+own.units.filter(u=>u.type==="worker").length*4;
-            own.units.forEach(u=>{if(u.type!=="worker")u.x=Math.min(side===1?850:850,u.x+(u.type==="sword"?5:2));});
+            own.units.forEach(u=>{if(u.type!=="worker")u.x=Math.max(50,Math.min(850,u.x+(side===1?1:-1)*(u.type==="sword"?5:2)));});
             const damage=own.units.filter(u=>u.type!=="worker"&&(side===1?u.x>=810:u.x<=90)).length;
             gs.baseHp[enemy]=Math.max(0,gs.baseHp[enemy]-damage);
           });
