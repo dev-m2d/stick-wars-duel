@@ -156,7 +156,7 @@
         backgroundColor:"#91cbd7",
         scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},
         render:{antialias:true,pixelArt:false},
-        scene:{create}
+        scene:{create:function(){try{return create.call(this);}catch(err){console.error('Battle scene error',err);const box=document.getElementById('game');if(box)box.innerHTML='<div style="padding:18px;color:white;background:#651f2b;direction:rtl">خطأ رسم الساحة: '+(err&&err.message?err.message:String(err))+'</div>';}}}
       };
       game=new Phaser.Game(config);
       game.events.once("ready",()=>{if(latest?.game)renderGame(latest.game);});
@@ -181,7 +181,7 @@
     scene=this;
     const g=this.add.graphics();
     // Bright sky, distant hills and a clear battlefield floor.
-    g.fillGradientStyle(0x75c9e4,0x75c9e4,0xc7e9e9,0xc7e9e9,1);
+    g.fillStyle(0x9acbd9,1);
     g.fillRect(0,0,960,540);
     g.fillStyle(0xffe39a,1);g.fillCircle(480,112,48);
     g.fillStyle(0xffffff,.58);
