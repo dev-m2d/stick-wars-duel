@@ -41,9 +41,11 @@
       $("waitingText").textContent = "انضم صديقك! جارٍ تجهيز المعركة…";
     });
     s.on("room:start", (data) => {
-      roomCode = data.code; player = data.player || player;
+      roomCode = data.code || roomCode;
       $("gameCode").textContent = roomCode;
-      show(gamePanel); startGame();
+      $("matchTitle").textContent = "أنت اللاعب " + player;
+      show(gamePanel);
+      if (!game) startGame();
     });
     s.on("game:action", (data) => {
       if (!sceneRef || data.player === player) return;
@@ -80,8 +82,8 @@
         if (!result || !result.ok) { setStatus(result?.message || "تعذر دخول الغرفة.", true); return; }
         roomCode = result.code; player = 2; multiplayer = true;
         $("gameCode").textContent = roomCode; $("matchTitle").textContent = "أنت اللاعب 2";
-        show(gamePanel); startGame();
-        s.emit("room:ready", { code });
+        $("waitingText").textContent = "تم دخول الغرفة، بانتظار بدء المباراة…";
+        show(waiting);
       });
     } catch (e) { setStatus(e.message, true); }
   });
