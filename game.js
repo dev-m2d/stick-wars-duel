@@ -48,7 +48,9 @@
         if(player===1) startHostLoop();
       }else if(latest.status==="waiting"){
         $("codeDisplay").textContent=roomCode;
-        $("waitingText").textContent="أرسل الكود لصديقك. الغرفة تسمح بلاعبين فقط.";
+        $("waitingText").textContent=player===2
+          ? "تم دخول الغرفة كلاعب 2. جاري بدء المباراة…"
+          : "أرسل الكود لصديقك. الغرفة تسمح بلاعبين فقط.";
         show(waiting);
       }else if(latest.status==="finished"){
         $("waitingText").textContent="انتهت الغرفة.";
@@ -91,15 +93,14 @@
         return room;
       },undefined,false);
       if(!started.committed){
-        throw new Error("تم حجز مكانك، لكن تعذر بدء المباراة. أعد المحاولة أو أنشئ غرفة جديدة.");
+        throw new Error("لم يتم بدء المباراة: Firebase لم يقبل تحديث حالة الغرفة. راجع صلاحيات Rules.");
       }
-      player=2;
       watchRoom();
     }catch(e){
       const message=e.message||"تعذر دخول الغرفة. راجع الكود وحاول.";
       say(message,true);
       if(roomRef && player===2){
-        $("waitingText").textContent=message;
+        $("waitingText").textContent="خطأ أثناء بدء المباراة: "+message;
         show(waiting);
       }
     }
