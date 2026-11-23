@@ -41,8 +41,7 @@
     roomListener=snap=>{
       if(!snap.exists()){say("الغرفة لم تعد موجودة.",true);show(lobby);return;}
       latest=snap.val();
-      if(latest.status==="started" && !gamePanel.classList.contains("hidden")) return;
-      if(latest.status==="started"){
+      if(latest.status==="started" && gamePanel.classList.contains("hidden")){
         $("gameCode").textContent=roomCode;
         $("matchTitle").textContent="أنت اللاعب "+player;
         show(gamePanel);startGame();
